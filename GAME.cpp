@@ -7,60 +7,64 @@
 
 using namespace std;
 
-int nScreenWidth = 80;			// Console Screen Size X (columns)
-int nScreenHeight = 30;			// Console Screen Size Y (rows)
-int nFieldWidth = 12;
-int nFieldHeight = 18;
+int screenWidth = 80;				// Размер экрана консоли по X (столбцы)
+int screenHeight = 30;			// Размер экрана консоли по Y (строки)
+int fieldWidth = 12;				// Размер игрового поля по X (стобцы)
+int fieldHeight = 18;				// Размер игрового поля по Y (строки)
+int sizeOfFigure = 4;				// Размер фигур
+int keyCount = 4;
 
 wstring tetromino[7];
 
-unsigned char* pField = nullptr;
+unsigned char* field = nullptr;
 
-int Rotate(int px, int py, int r) {
+int rotate(int x, int y, int flipAngle) {
 	int pi = 0;
-	switch (r % 4) {
-	case 0: // 0 degrees			// 0  1  2  3
-		pi = py * 4 + px;			// 4  5  6  7
-		break;						// 8  9 10 11
-		//12 13 14 15
 
-	case 1: // 90 degrees			//12  8  4  0
-		pi = 12 + py - (px * 4);	//13  9  5  1
-		break;						//14 10  6  2
-		//15 11  7  3
+	switch (flipAngle % sizeOfFigure) {
+	case 0: // 0 градусов			// 0  1  2  3
+		pi = y * sizeOfFigure + x;					// 4  5  6  7
+		break;									// 8  9  10 11
+														// 12 13 14 15
 
-	case 2: // 180 degrees			//15 14 13 12
-		pi = 15 - (py * 4) - px;	//11 10  9  8
-		break;						// 7  6  5  4
-		// 3  2  1  0
+	case 1: // 90 градусов			// 12  8  4  0
+		pi = 12 + y - (x * sizeOfFigure);		// 13  9  5  1
+		break;										// 14 10  6  2
+															// 15 11  7  3
 
-	case 3: // 270 degrees			// 3  7 11 15
-		pi = 3 - py + (px * 4);		// 2  6 10 14
-		break;						// 1  5  9 13
-	}								// 0  4  8 12
+	case 2: // 180 градусов			// 15 14 13 12
+		pi = 15 - (y * sizeOfFigure) - x;		// 11 10  9  8
+		break;										//  7  6  5  4
+															//  3  2  1  0
+
+	case 3: // 270 градусов			// 3  7  11  15
+		pi = 3 - y + (x * sizeOfFigure);			// 2  6  10  14
+		break;										// 1  5   9  13
+	}														// 0  4   8  12
 
 	return pi;
 }
 
-bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY) {
-	// All Field cells >0 are occupied
-	for (int px = 0; px < 4; ++px) {
-		for (int py = 0; py < 4; ++py) {
-			// Get index into piece
-			int pi = Rotate(px, py, nRotation);
+bool doesFigureFit(int tetrominoIndex, int rotation, int positionX, int positionY) {
+	// Все ячейки поля > 0 заняты
+	for (int px = 0; px < sizeOfFigure; ++px) {
+		for (int py = 0; py < sizeOfFigure; ++py) {
+			// Собрать индекс в единое целое
+			int pi = rotate(px, py, rotation);
 
-			// Get index into field
-			int fi = (nPosY + py) * nFieldWidth + (nPosX + px);
+			// Получить индекс в поле
+			int fi = (positionY + py) * fieldWidth + (positionX + px);
 
-			// Check that test is in bounds. Note out of bounds does
-			// not necessarily mean a fail, as the long vertical piece
-			// can have cells that lie outside the boundary, so we'll
-			// just ignore them
-			if (nPosX + px >= 0 && nPosX + px < nFieldWidth) {
-				if (nPosY + py >= 0 && nPosY + py < nFieldHeight) {
-					// In Bounds so do collision check
-					if (tetromino[nTetromino][pi] != L'.' && pField[fi] != 0) {
-						return false; // fail on first hit
+			// Проверка, что тест находится в границах
+			// выход за границы не обязательно означает неудачу,
+			// поскольку длинный вертикальный фрагмент может содержать ячейки,
+			// которые лежат за пределами границы
+
+			if (positionX + px >= 0 && positionX + px < fieldWidth) {
+				if (positionY + py >= 0 && positionY + py < fieldHeight) {
+					// Проверка на столкновение
+					if (tetromino[tetrominoIndex][pi] != L'.' && field[fi] != 0) {
+						return false; // Сбой при первом попадании
 					}
 				}
 			}
@@ -70,18 +74,18 @@ bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY) {
 }
 
 int main() {
-	// Create Screen Buffer
-	wchar_t* screen = new wchar_t[nScreenWidth * nScreenHeight];
-	for (int i = 0; i < nScreenWidth * nScreenHeight; ++i) {
-		screen[i] = L' ';
+	// Создание экранного буфера
+	wchar_t* screen = new wchar_t[screenWidth * screenHeight];
+	for (int screenIndex = 0; screenIndex < screenWidth * screenHeight; ++screenIndex) {
+		screen[screenIndex] = L' ';
 	}
 	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
-																							0, NULL, CONSOLE_TEXTMODE_BUFFER, 
+																							0, NULL, CONSOLE_TEXTMODE_BUFFER,
 																							NULL);
 	SetConsoleActiveScreenBuffer(hConsole);
 	DWORD dwBytesWritten = 0;
 
-	tetromino[0].append(L"..X...X...X...X."); // Tetronimos 4x4
+	tetromino[0].append(L"..X...X...X...X."); // Фигуры размера 4x4
 	tetromino[1].append(L"..X..XX...X.....");
 	tetromino[2].append(L".....XX..XX.....");
 	tetromino[3].append(L"..X..XX..X......");
@@ -89,159 +93,161 @@ int main() {
 	tetromino[5].append(L".X...X...XX.....");
 	tetromino[6].append(L"..X...X..XX.....");
 
-	pField = new unsigned char[nFieldWidth * nFieldHeight]; // Create play field buffer
-	for (int x = 0; x < nFieldWidth; ++x) // Board Boundary
-		for (int y = 0; y < nFieldHeight; ++y)
-			pField[y * nFieldWidth + x] = (x == 0 || x == nFieldWidth - 1 || 
-																		 y == nFieldHeight - 1) ? 9 : 0;
-
-	// Game Logic
-	bool bKey[4];
-	int nCurrentPiece = 0;
-	int nCurrentRotation = 0;
-	int nCurrentX = nFieldWidth / 2;
-	int nCurrentY = 0;
-	int nSpeed = 20;
-	int nSpeedCount = 0;
-	bool bForceDown = false;
-	bool bRotateHold = true;
-	int nPieceCount = 0;
-	int nScore = 0;
-	vector<int> vLines;
-	bool bGameOver = false;
-
-	while (!bGameOver) { // Main Loop
-		// Timing =======================
-		this_thread::sleep_for(50ms); // Small Step = 1 Game Tick
-		++nSpeedCount;
-		bForceDown = (nSpeedCount == nSpeed);
-
-		// Input ========================
-		for (int k = 0; k < 4; ++k)								// R   L   D Z
-			bKey[k] = (0x8000 & GetAsyncKeyState((unsigned char)("\x27\x25\x28Z"[k]))) != 0;
-
-		// Game Logic ===================
-
-		// Handle player movement
-		nCurrentX += (bKey[0] && DoesPieceFit(nCurrentPiece, nCurrentRotation, 
-									nCurrentX + 1, nCurrentY)) ? 1 : 0;
-		nCurrentX -= (bKey[1] && DoesPieceFit(nCurrentPiece, nCurrentRotation, 
-									nCurrentX - 1, nCurrentY)) ? 1 : 0;
-		nCurrentY += (bKey[2] && DoesPieceFit(nCurrentPiece, nCurrentRotation, 
-									nCurrentX, nCurrentY + 1)) ? 1 : 0;
-
-		// Rotate, but latch to stop wild spinning
-		if (bKey[3]) {
-			nCurrentRotation += (bRotateHold && DoesPieceFit(nCurrentPiece, 
-													 nCurrentRotation + 1, nCurrentX, nCurrentY)) ? 1 : 0;
-			bRotateHold = false;
-		} else {
-			bRotateHold = true;
+	field = new unsigned char[fieldWidth * fieldHeight]; // Создание буфера игрового поля
+	for (int x = 0; x < fieldWidth; ++x) { // Границы поля
+		for (int y = 0; y < fieldHeight; ++y) {
+			field[y * fieldWidth + x] = (x == 0 || x == fieldWidth - 1 ||
+																	 y == fieldHeight - 1) ? 9 : 0;
 		}
-
-		// Force the piece down the playfield if it's time
-		if (bForceDown) {
-			// Update difficulty every 50 pieces
-			nSpeedCount = 0;
-			++nPieceCount;
-			if (nPieceCount % 50 == 0) {
-				if (nSpeed >= 10) {
-					--nSpeed;
-				}
-			}
-			// Test if piece can be moved down
-			if (DoesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY + 1)) {
-				++nCurrentY; // It can, so do it!
-			} else {
-				// It can't! Lock the piece in place
-				for (int px = 0; px < 4; ++px)
-					for (int py = 0; py < 4; ++py)
-						if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.')
-							pField[(nCurrentY + py) * nFieldWidth + (nCurrentX + px)] = 
-																											  nCurrentPiece + 1;
-
-				// Check for lines
-				for (int py = 0; py < 4; ++py) {
-					if (nCurrentY + py < nFieldHeight - 1) {
-						bool bLine = true;
-
-						for (int px = 1; px < nFieldWidth - 1; ++px) {
-							bLine &= (pField[(nCurrentY + py) * nFieldWidth + px]) != 0;
-						}
-						if (bLine) {
-							// Remove Line, set to =
-							for (int px = 1; px < nFieldWidth - 1; ++px) {
-								pField[(nCurrentY + py) * nFieldWidth + px] = 8;
-							}
-							vLines.push_back(nCurrentY + py);
-						}
-					}
-				}
-				nScore += 25;
-				if (!vLines.empty()) {
-					nScore += (1 << vLines.size()) * 100;
-				}
-
-				// Pick New Piece
-				nCurrentX = nFieldWidth / 2;
-				nCurrentY = 0;
-				nCurrentRotation = 0;
-				nCurrentPiece = rand() % 7;
-
-				// If piece does not fit straight away, game over!
-				bGameOver = !DoesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY);
-			}
-		}
-
-		// Display ======================
-
-		// Draw Field
-		for (int x = 0; x < nFieldWidth; ++x) {
-			for (int y = 0; y < nFieldHeight; ++y) {
-				screen[(y + 2) * nScreenWidth + (x + 2)] = L" ABCDEFG=#"[pField[y * nFieldWidth + x]];
-			}
-		}
-
-		// Draw Current Piece
-		for (int px = 0; px < 4; ++px) {
-			for (int py = 0; py < 4; ++py) {
-				if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.') {
-					screen[(nCurrentY + py + 2) * nScreenWidth + (nCurrentX + px + 2)] = 
-																														nCurrentPiece + 65;
-				}
-			}
-		}
-
-		// Draw Score
-		swprintf_s(&screen[2 * nScreenWidth + nFieldWidth + 6], 16, L"SCORE: %8d", nScore);
-
-		// Animate Line Completion
-		if (!vLines.empty()) {
-			// Display Frame (cheekily to draw lines)
-			WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, 
-																											 { 0,0 }, &dwBytesWritten);
-			this_thread::sleep_for(400ms); // Delay a bit
-
-			for (auto& v : vLines) {
-				for (int px = 1; px < nFieldWidth - 1; ++px) {
-					for (int py = v; py > 0; --py) {
-						pField[py * nFieldWidth + px] = pField[(py - 1) * nFieldWidth + px];
-					}
-					pField[px] = 0;
-				}
-			}
-			vLines.clear();
-		}
-
-		// Display Frame
-		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, 
-																										 { 0,0 }, &dwBytesWritten);
 	}
 
-	// Oh Dear
+	// Логика игры
+	bool key[4];
+	int currentFigure = 0;
+	int currentRotation = 0;
+	int currentX = fieldWidth / 2;
+	int currentY = 0;
+	int speed = 20;
+	int speedCount = 0;
+	bool forceDown = false;
+	bool rotateHold = true;
+	int figureCount = 0;
+	int score = 0;
+	vector<int> lines;
+	bool isGameRunning = true;
+
+	while (isGameRunning) { // Основной цикл
+		// Синхронизация
+		this_thread::sleep_for(50ms); // Маленький шаг - 1 игровой тик
+		++speedCount;
+		forceDown = (speedCount == speed);
+
+		// Ввод
+		for (int keyIndex = 0; keyIndex < keyCount; ++keyIndex) {
+			key[keyIndex] = ( 0x8000 & GetAsyncKeyState ( (unsigned char)
+											("\x27\x25\x28Z"[keyIndex]) ) ) != 0;
+		}
+
+		// Логика игры
+
+		// Считывание действий игрока
+		currentX += (key[0] && doesFigureFit(currentFigure, currentRotation,
+								 currentX + 1, currentY)) ? 1 : 0;
+		currentX -= (key[1] && doesFigureFit(currentFigure, currentRotation,
+								 currentX - 1, currentY)) ? 1 : 0;
+		currentY += (key[2] && doesFigureFit(currentFigure, currentRotation,
+								 currentX, currentY + 1)) ? 1 : 0;
+
+		// Вращение фигуры
+		if (key[3]) {
+			currentRotation += (rotateHold && doesFigureFit(currentFigure,
+				                  currentRotation + 1, currentX, currentY)) ? 1 : 0;
+			rotateHold = false;
+		} else {
+			rotateHold = true;
+		}
+
+		if (forceDown) {
+			// Изменение скорости игры каждые 50 фигур
+			speedCount = 0;
+
+			++figureCount;
+
+			if (figureCount % 50 == 0 && speed >= 10) {
+				--speed;
+			}
+
+			// Проверка, можно ли сдвинуть фигуру вниз
+			if (doesFigureFit(currentFigure, currentRotation, currentX, currentY + 1)) {
+				++currentY;
+			} else {
+				// Если нельзя, фиксируем деталь на месте
+				for (int px = 0; px < sizeOfFigure; ++px)
+					for (int py = 0; py < sizeOfFigure; ++py)
+						if (tetromino[currentFigure][rotate(px, py, currentRotation)] != L'.')
+								field[(currentY + py) * fieldWidth + (currentX + px)] =
+								currentFigure + 1;
+
+				// Проверка наличия линии
+				for (int py = 0; py < sizeOfFigure; ++py) {
+					if (currentY + py < fieldHeight - 1) {
+						bool line = true;
+
+						for (int px = 1; px < fieldWidth - 1; ++px) {
+							line &= (field[(currentY + py) * fieldWidth + px]) != 0;
+						}
+						if (line) {
+							// Удаление линии
+							for (int px = 1; px < fieldWidth - 1; ++px) {
+								field[(currentY + py) * fieldWidth + px] = 8;
+							}
+							lines.push_back(currentY + py);
+						}
+					}
+				}
+				score += 25;
+				if (!lines.empty()) {
+					score += (1 << lines.size()) * 100;
+				}
+
+				// Выбор новой фигуры
+				currentX = fieldWidth / 2;
+				currentY = 0;
+				currentRotation = 0;
+				currentFigure = rand() % 7;
+
+				// Если фигура не проходит, игра окончена
+				isGameRunning = doesFigureFit(currentFigure, currentRotation, currentX, currentY);
+			}
+		}
+
+		// Вывод
+
+		// Отрисовка поля
+		for (int x = 0; x < fieldWidth; ++x) {
+			for (int y = 0; y < fieldHeight; ++y) {
+				screen[(y + 2) * screenWidth + (x + 2)] = L" ABCDEFG=#"[field[y * fieldWidth + x]];
+			}
+		}
+
+		// Отрисовка текущей фигуры
+		for (int px = 0; px < sizeOfFigure; ++px) {
+			for (int py = 0; py < sizeOfFigure; ++py) {
+				if (tetromino[currentFigure][rotate(px, py, currentRotation)] != L'.') {
+						screen[(currentY + py + 2) * screenWidth + (currentX + px + 2)] =
+						currentFigure + 65;
+				}
+			}
+		}
+
+		// Отрисовка счета
+		swprintf_s(&screen[2 * screenWidth + fieldWidth + 6], 16, L"SCORE: %8d", score);
+
+		// Анимация удаления строки
+		if (!lines.empty()) {
+			WriteConsoleOutputCharacter(hConsole, screen, screenWidth * screenHeight,
+																	{ 0,0 }, &dwBytesWritten);
+			this_thread::sleep_for(400ms);
+
+			for (auto& v : lines) {
+				for (int px = 1; px < fieldWidth - 1; ++px) {
+					for (int py = v; py > 0; --py) {
+						field[py * fieldWidth + px] = field[(py - 1) * fieldWidth + px];
+					}
+					field[px] = 0;
+				}
+			}
+			lines.clear();
+		}
+
+		// Отрисовка кадра
+		WriteConsoleOutputCharacter(hConsole, screen, screenWidth * screenHeight,
+																{ 0,0 }, &dwBytesWritten);
+	}
+
 	CloseHandle(hConsole);
 
-	cout << "Game Over!! Score: " << nScore << endl;
+	cout << "Game Over!! Score: " << score << endl;
 
 	system("pause");
 
