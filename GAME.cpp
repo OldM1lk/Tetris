@@ -22,25 +22,25 @@ int rotate(int x, int y, int flipAngle) {
 	int pi = 0;
 
 	switch (flipAngle % sizeOfFigure) {
-	case 0: // 0 градусов			// 0  1  2  3
+	case 0: // 0 градусов									// 0  1  2  3
 		pi = y * sizeOfFigure + x;					// 4  5  6  7
-		break;									// 8  9  10 11
-														// 12 13 14 15
+		break;															// 8  9  10 11
+																				// 12 13 14 15
 
-	case 1: // 90 градусов			// 12  8  4  0
+	case 1: // 90 градусов								// 12  8  4  0
 		pi = 12 + y - (x * sizeOfFigure);		// 13  9  5  1
-		break;										// 14 10  6  2
-															// 15 11  7  3
+		break;															// 14 10  6  2
+																				// 15 11  7  3
 
-	case 2: // 180 градусов			// 15 14 13 12
+	case 2: // 180 градусов								// 15 14 13 12
 		pi = 15 - (y * sizeOfFigure) - x;		// 11 10  9  8
-		break;										//  7  6  5  4
-															//  3  2  1  0
+		break;															//  7  6  5  4
+																				//  3  2  1  0
 
-	case 3: // 270 градусов			// 3  7  11  15
+	case 3: // 270 градусов									// 3  7  11  15
 		pi = 3 - y + (x * sizeOfFigure);			// 2  6  10  14
-		break;										// 1  5   9  13
-	}														// 0  4   8  12
+		break;																// 1  5   9  13
+	}																				// 0  4   8  12
 
 	return pi;
 }
