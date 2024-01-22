@@ -125,7 +125,7 @@ int main() {
 		// Ввод
 		for (int keyIndex = 0; keyIndex < keyCount; ++keyIndex) {
 			key[keyIndex] = ( 0x8000 & GetAsyncKeyState ( (unsigned char)
-											("\x27\x25\x28Z"[keyIndex]) ) ) != 0;
+											("\x27\x25\x28\x26"[keyIndex]) ) ) != 0;
 		}
 
 		// Логика игры
