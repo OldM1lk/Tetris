@@ -8,7 +8,7 @@
 
 using namespace std;
 
-bool gameOver = false;
+bool isGameRunning = true;
 
 const int blocksCount = 7;
 const char blocksSprites[blocksCount]{ 'A', 'B', 'C', 'D', 'E', 'F', 'G' };
@@ -181,14 +181,19 @@ void clearMap() {
 void logic() {
   if (canMoveBlockRight()) {
     doMoveBlockRight();
-  } else {
+  }
+  else {
     for (int rowIndex = 0; rowIndex < map.size(); ++rowIndex) {
+
       for (int columnIndex = 0; columnIndex < map[rowIndex].size(); ++columnIndex) {
+
         if (columnIndex >= realBlock.positionX && columnIndex <= realBlock.positionX + 3 && rowIndex >= realBlock.positionY && rowIndex <= realBlock.positionY + 3) {
+
           if (realBlock.shape[rowIndex - realBlock.positionY][columnIndex - realBlock.positionX] == 1) {
             map[rowIndex][columnIndex] = realBlock.sprite;
           }
         }
+
       }
     }
 
@@ -198,7 +203,7 @@ void logic() {
     realBlock = a;
 
     if (!canMoveBlockRight()) {
-      gameOver = true;
+      isGameRunning = false;
     }
   }
 
@@ -213,15 +218,19 @@ void drawMap() {
       if (columnIndex >= realBlock.positionX && columnIndex <= realBlock.positionX + 3 && rowIndex >= realBlock.positionY && rowIndex <= realBlock.positionY + 3) {
         if (realBlock.shape[rowIndex - realBlock.positionY][columnIndex - realBlock.positionX] == 1) {
           cout << realBlock.sprite;
-        } else if (map[rowIndex][columnIndex] == '*') {
+        }
+        else if (map[rowIndex][columnIndex] == '*') {
           cout << wallSprite;
-        } else {
+        }
+        else {
           cout << map[rowIndex][columnIndex];
         }
 
-      } else if (map[rowIndex][columnIndex] == '*') {
+      }
+      else if (map[rowIndex][columnIndex] == '*') {
         cout << wallSprite;
-      } else {
+      }
+      else {
         cout << map[rowIndex][columnIndex];
       }
 
@@ -288,7 +297,7 @@ void controls() {
 int main() {
   int timer = time(NULL);
 
-  while (!gameOver) {
+  while (isGameRunning) {
     controls();
 
     if (time(NULL) - timer > 0) {
