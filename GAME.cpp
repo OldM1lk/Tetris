@@ -159,22 +159,24 @@ void doMoveBlockRight() {
 }
 
 void clearMap() {
-  for (int delRowIndex = 0; delRowIndex < map.size() - 1; ++delRowIndex) {
-    int rowLength = map[delRowIndex].size();
+  for (int delColumnIndex = 0; delColumnIndex < map[0].size() - 1; ++delColumnIndex) {
+    int columnLength = map.size();
 
-    for (int columnIndex = 0; columnIndex < map[delRowIndex].size(); ++columnIndex) {
-      if (map[delRowIndex][columnIndex] != ' ') {
-        --rowLength;
+    for (int rowIndex = 0; rowIndex < map.size(); ++rowIndex) {
+      if (map[rowIndex][delColumnIndex] != ' ') {
+        --columnLength;
       }
     }
 
-    if (rowLength == 0) {
+    if (columnLength == 0) {
       ++score;
-      for (int toClearRowIndex = delRowIndex; toClearRowIndex > 0; --toClearRowIndex) {
-        map[toClearRowIndex] = map[toClearRowIndex - 1];
+
+      for (int toClearColumnIndex = delColumnIndex; toClearColumnIndex > 0; --toClearColumnIndex) {
+        for (int toClearRowIndex = 0; toClearRowIndex < map.size(); ++toClearRowIndex) {
+          map[toClearRowIndex][toClearColumnIndex] = map[toClearRowIndex][toClearColumnIndex - 1];
+        }
       }
     }
-
   }
 }
 
