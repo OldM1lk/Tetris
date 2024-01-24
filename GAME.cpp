@@ -265,8 +265,9 @@ void tryRotate() {
 void controls() {
   if (_kbhit()) {
     switch (_getch()) {
-    case 'w':
     case 'W':
+    case 'w':
+    case 72:
       if (canMoveBlockUp()) {
         doMoveBlockUp();
         drawMap();
@@ -274,13 +275,15 @@ void controls() {
       break;
     case 'D':
     case 'd':
+    case 77:
       if (canMoveBlockRight()) {
         doMoveBlockRight();
         drawMap();
       }
       break;
-    case 's':
     case 'S':
+    case 's':
+    case 80:
       if (canFall()) {
         doFall();
         drawMap();
@@ -288,6 +291,7 @@ void controls() {
       break;
     case 'A':
     case 'a':
+    case 75:
       tryRotate();
       break;
     }
