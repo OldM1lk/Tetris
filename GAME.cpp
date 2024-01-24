@@ -159,19 +159,19 @@ void doMoveBlockRight() {
 }
 
 void clearMap() {
-  for (int examRowIndex = 0; examRowIndex < map.size() - 1; ++examRowIndex) {
-    int rowLength = map[examRowIndex].size();
+  for (int delRowIndex = 0; delRowIndex < map.size() - 1; ++delRowIndex) {
+    int rowLength = map[delRowIndex].size();
 
-    for (int columnIndex = 0; columnIndex < map[examRowIndex].size(); ++columnIndex) {
-      if (map[examRowIndex][columnIndex] != ' ') {
+    for (int columnIndex = 0; columnIndex < map[delRowIndex].size(); ++columnIndex) {
+      if (map[delRowIndex][columnIndex] != ' ') {
         --rowLength;
       }
     }
 
     if (rowLength == 0) {
       ++score;
-      for (int toClerrRowIndex = examRowIndex; toClerrRowIndex > 0; --toClerrRowIndex) {
-        map[toClerrRowIndex] = map[toClerrRowIndex - 1];
+      for (int toClearRowIndex = delRowIndex; toClearRowIndex > 0; --toClearRowIndex) {
+        map[toClearRowIndex] = map[toClearRowIndex - 1];
       }
     }
 
@@ -181,19 +181,14 @@ void clearMap() {
 void logic() {
   if (canMoveBlockRight()) {
     doMoveBlockRight();
-  }
-  else {
+  } else {
     for (int rowIndex = 0; rowIndex < map.size(); ++rowIndex) {
-
       for (int columnIndex = 0; columnIndex < map[rowIndex].size(); ++columnIndex) {
-
         if (columnIndex >= realBlock.positionX && columnIndex <= realBlock.positionX + 3 && rowIndex >= realBlock.positionY && rowIndex <= realBlock.positionY + 3) {
-
           if (realBlock.shape[rowIndex - realBlock.positionY][columnIndex - realBlock.positionX] == 1) {
             map[rowIndex][columnIndex] = realBlock.sprite;
           }
         }
-
       }
     }
 
@@ -213,30 +208,22 @@ void drawMap() {
   system("cls");
 
   for (int rowIndex = 0; rowIndex < map.size(); ++rowIndex) {
-
     for (int columnIndex = 0; columnIndex < map[rowIndex].size(); ++columnIndex) {
       if (columnIndex >= realBlock.positionX && columnIndex <= realBlock.positionX + 3 && rowIndex >= realBlock.positionY && rowIndex <= realBlock.positionY + 3) {
         if (realBlock.shape[rowIndex - realBlock.positionY][columnIndex - realBlock.positionX] == 1) {
           cout << realBlock.sprite;
-        }
-        else if (map[rowIndex][columnIndex] == '*') {
+        } else if (map[rowIndex][columnIndex] == '*') {
           cout << wallSprite;
-        }
-        else {
+        } else {
           cout << map[rowIndex][columnIndex];
         }
-
-      }
-      else if (map[rowIndex][columnIndex] == '*') {
+      } else if (map[rowIndex][columnIndex] == '*') {
         cout << wallSprite;
-      }
-      else {
+      } else {
         cout << map[rowIndex][columnIndex];
       }
-
     }
     cout << endl;
-
   }
 };
 
