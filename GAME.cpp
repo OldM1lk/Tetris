@@ -11,7 +11,7 @@ using namespace std;
 bool gameOver = false;
 
 const int blocksCount = 7;
-const char blocksSprites[blocksCount]{ '0', '1', '2', '3', '4', '5', '6' };
+const char blocksSprites[blocksCount]{ 'A', 'B', 'C', 'D', 'E', 'F', 'G' };
 
 const char wallSprite = '#';
 
@@ -116,7 +116,7 @@ bool canMoveBlockRight() {
     }
   }
   return true;
-};
+}
 
 bool canMoveBlockUp() {
   for (int x = realBlock.positionX; x <= realBlock.positionX + 3; ++x) {
@@ -130,7 +130,7 @@ bool canMoveBlockUp() {
     }
   }
   return true;
-};
+}
 
 bool canFall() {
   for (int y = realBlock.positionY; y <= realBlock.positionY + 3; ++y) {
@@ -144,7 +144,7 @@ bool canFall() {
     }
   }
   return true;
-};
+}
 
 void doFall() {
   ++realBlock.positionY;
@@ -179,21 +179,16 @@ void clearMap() {
 }
 
 void logic() {
-  if ( canMoveBlockRight() ) {
+  if (canMoveBlockRight()) {
     doMoveBlockRight();
-  }
-  else {
+  } else {
     for (int rowIndex = 0; rowIndex < map.size(); ++rowIndex) {
-
       for (int columnIndex = 0; columnIndex < map[rowIndex].size(); ++columnIndex) {
-
         if (columnIndex >= realBlock.positionX && columnIndex <= realBlock.positionX + 3 && rowIndex >= realBlock.positionY && rowIndex <= realBlock.positionY + 3) {
-
           if (realBlock.shape[rowIndex - realBlock.positionY][columnIndex - realBlock.positionX] == 1) {
             map[rowIndex][columnIndex] = realBlock.sprite;
           }
         }
-
       }
     }
 
@@ -202,7 +197,7 @@ void logic() {
     block a;
     realBlock = a;
 
-    if ( !canMoveBlockRight() ) {
+    if (!canMoveBlockRight()) {
       gameOver = true;
     }
   }
